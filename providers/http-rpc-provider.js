@@ -34,10 +34,21 @@ function getResult(payload) {
         var error = new Error(payload.error.message);
         error.code = payload.error.code;
         error.data = payload.error.data;
+
+        if(payload.error.message == 'insufficient funds for gas * price + value'){
+            error.message = '账户余额不足，无法进行当前操作'
+        }
         throw error;
     }
 
     return payload.result;
+}
+
+function stripHexZeros(value) {
+    while (value.length > 3 && value.substring(0, 3) === '0x0') {
+        value = '0x' + value.substring(3);
+    }
+    return value;
 }
 
 function getTransaction(transaction) {
@@ -150,8 +161,8 @@ utils.defineProperty(JsonRpcSigner.prototype, 'unlock', function(password) {
 });
 
 
-function JsonRpcProvider(url, network) {
-    errors.checkNew(this, JsonRpcProvider);
+function HttpRpcProvider(url, network) {
+    errors.checkNew(this, HttpRpcProvider);
 
     if (arguments.length == 1) {
         if (typeof(url) === 'string') {
@@ -171,13 +182,13 @@ function JsonRpcProvider(url, network) {
 
     utils.defineProperty(this, 'url', url);
 }
-Provider.inherits(JsonRpcProvider);
+Provider.inherits(HttpRpcProvider);
 
-utils.defineProperty(JsonRpcProvider.prototype, 'getSigner', function(address) {
+utils.defineProperty(HttpRpcProvider.prototype, 'getSigner', function(address) {
     return new JsonRpcSigner(this, address);
 });
 
-utils.defineProperty(JsonRpcProvider.prototype, 'listAccounts', function() {
+utils.defineProperty(HttpRpcProvider.prototype, 'listAccounts', function() {
     return this.send('eth_accounts', []).then(function(accounts) {
         accounts.forEach(function(address, index) {
             accounts[index] = utils.getAddress(address);
@@ -186,7 +197,7 @@ utils.defineProperty(JsonRpcProvider.prototype, 'listAccounts', function() {
     });
 });
 
-utils.defineProperty(JsonRpcProvider.prototype, 'send', function(method, params) {
+utils.defineProperty(HttpRpcProvider.prototype, 'send', function(method, params) {
     /* var request = { */
         // method: method,
         // params: params,
@@ -200,7 +211,7 @@ utils.defineProperty(JsonRpcProvider.prototype, 'send', function(method, params)
     return Provider.fetchJSON(url, JSON.stringify(params), getResult);
 });
 
-utils.defineProperty(JsonRpcProvider.prototype, 'perform', function(method, params) {
+utils.defineProperty(HttpRpcProvider.prototype, 'perform', function(method, params) {
     switch (method) {
         case 'getBlockNumber':
             return this.send('get_block_number', []);
@@ -273,7 +284,7 @@ utils.defineProperty(JsonRpcProvider.prototype, 'perform', function(method, para
 
 });
 
-utils.defineProperty(JsonRpcProvider.prototype, '_startPending', function() {
+utils.defineProperty(HttpRpcProvider.prototype, '_startPending', function() {
     if (this._pendingFilter != null) { return; }
     var self = this;
 
@@ -311,12 +322,12 @@ utils.defineProperty(JsonRpcProvider.prototype, '_startPending', function() {
     });
 });
 
-utils.defineProperty(JsonRpcProvider.prototype, '_stopPending', function() {
+utils.defineProperty(HttpRpcProvider.prototype, '_stopPending', function() {
     this._pendingFilter = null;
 });
 
-utils.defineProperty(JsonRpcProvider, '_hexlifyTransaction', function(transaction) {
+utils.defineProperty(HttpRpcProvider, '_hexlifyTransaction', function(transaction) {
     return getTransaction(transaction);
 });
 
-module.exports = JsonRpcProvider;
+module.exports = HttpRpcProvider;

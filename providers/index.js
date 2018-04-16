@@ -7,6 +7,7 @@ var FallbackProvider = require('./fallback-provider');
 var IpcProvider = require('./ipc-provider');
 var InfuraProvider = require('./infura-provider');
 var JsonRpcProvider = require('./json-rpc-provider');
+var HttpRpcProvider = require('./http-rpc-provider');
 var Web3Provider = require('./web3-provider');
 
 function getDefaultProvider(network) {
@@ -21,6 +22,7 @@ var exports = {
     FallbackProvider: FallbackProvider,
     InfuraProvider: InfuraProvider,
     JsonRpcProvider: JsonRpcProvider,
+    HttpRpcProvider: HttpRpcProvider,
     Web3Provider: Web3Provider,
 
     isProvider: Provider.isProvider,
