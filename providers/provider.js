@@ -422,6 +422,9 @@ function Provider(network) {
 
             if (lastBlockNumber === null) { lastBlockNumber = blockNumber - 1; }
 
+            // 防止块事件被跳过，依次获取事件
+            if (blockNumber > lastBlockNumber + 1) { blockNumber = lastBlockNumber + 1; }
+
             // Notify all listener for each block that has passed
             for (var i = lastBlockNumber + 1; i <= blockNumber; i++) {
                 if (self._emitted.block < i) {
@@ -494,7 +497,7 @@ function Provider(network) {
         self.doPoll();
     });
 
-    var pollingInterval = 4000;
+    var pollingInterval = 3000;
 
     var poller = null;
     Object.defineProperty(this, 'polling', {
